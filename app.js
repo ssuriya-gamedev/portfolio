@@ -171,6 +171,35 @@ const setVideoLoading = (video, isLoading) => {
   }
 };
 
+const setVideoPlaying = (video, isPlaying) => {
+  const clip = getVideoClip(video);
+
+  if (clip) {
+    clip.classList.toggle("is-playing", isPlaying);
+  }
+};
+
+const addPlayButton = (video) => {
+  const clip = getVideoClip(video);
+
+  if (!clip || clip.querySelector(".clip-play")) {
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.className = "clip-play";
+  button.type = "button";
+  button.setAttribute("aria-label", "Play video");
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    pauseInactiveVideos(video);
+    playVideo(video);
+  });
+
+  clip.append(button);
+};
+
 const hydrateVideo = (video) => {
   if (reduceMotion.matches || video.dataset.hydrated === "true") {
     return;
@@ -186,7 +215,6 @@ const hydrateVideo = (video) => {
     video.src = source;
   }
 
-  setVideoLoading(video, true);
   video.preload = "metadata";
   video.dataset.hydrated = "true";
   video.load();
@@ -216,11 +244,17 @@ const playVideo = (video) => {
     return;
   }
 
+  video.dataset.playRequested = "true";
+  setVideoLoading(video, true);
   hydrateVideo(video);
   const playAttempt = video.play();
 
   if (playAttempt && typeof playAttempt.catch === "function") {
-    playAttempt.catch(() => {});
+    playAttempt.catch(() => {
+      delete video.dataset.playRequested;
+      setVideoLoading(video, false);
+      setVideoPlaying(video, false);
+    });
   }
 };
 
@@ -352,14 +386,39 @@ const videoObserver = supportsIntersectionObserver
   : null;
 
 videos.forEach((video) => {
-  video.addEventListener("loadstart", () => setVideoLoading(video, true));
+  addPlayButton(video);
+  video.addEventListener("loadstart", () => {
+    setVideoLoading(video, video.dataset.playRequested === "true");
+  });
   video.addEventListener("waiting", () => {
-    setVideoLoading(video, video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
+    setVideoLoading(
+      video,
+      video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA &&
+        (!video.paused || video.dataset.playRequested === "true"),
+    );
+  });
+  video.addEventListener("loadedmetadata", () => {
+    if (video.paused && video.dataset.playRequested !== "true") {
+      setVideoLoading(video, false);
+    }
   });
   video.addEventListener("loadeddata", () => setVideoLoading(video, false));
   video.addEventListener("canplay", () => setVideoLoading(video, false));
-  video.addEventListener("playing", () => setVideoLoading(video, false));
-  video.addEventListener("error", () => setVideoLoading(video, false));
+  video.addEventListener("playing", () => {
+    delete video.dataset.playRequested;
+    setVideoLoading(video, false);
+    setVideoPlaying(video, true);
+  });
+  video.addEventListener("pause", () => {
+    delete video.dataset.playRequested;
+    setVideoLoading(video, false);
+    setVideoPlaying(video, false);
+  });
+  video.addEventListener("error", () => {
+    delete video.dataset.playRequested;
+    setVideoLoading(video, false);
+    setVideoPlaying(video, false);
+  });
   video.pause();
 
   if (supportsIntersectionObserver) {
