@@ -232,12 +232,18 @@ const pauseInactiveVideos = (activeVideo) => {
   });
 };
 
-const refreshVisibleVideos = () => {
-  if (supportsIntersectionObserver) {
-    return;
-  }
+const getViewportHeight = () => {
+  const visualViewport = window.visualViewport;
 
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  return (
+    (visualViewport && visualViewport.height) ||
+    window.innerHeight ||
+    document.documentElement.clientHeight
+  );
+};
+
+const refreshVisibleVideos = () => {
+  const viewportHeight = getViewportHeight();
   const topBias = viewportHeight * 0.15;
 
   visibleVideos.clear();
