@@ -336,6 +336,10 @@ h2 {
   --group-rule: rgba(158, 182, 255, 0.42);
 }
 
+.final-panel {
+  padding-bottom: clamp(9rem, 18vh, 18rem);
+}
+
 .clip::before {
   content: "";
   position: absolute;
@@ -478,6 +482,10 @@ h2 {
     width: min(100% - 1.25rem, var(--max));
     gap: 1.35rem;
     padding: clamp(4.5rem, 7vh, 7rem) 0;
+  }
+
+  .final-panel {
+    padding-bottom: clamp(8rem, 16vh, 14rem);
   }
 
   .intro-panel {
