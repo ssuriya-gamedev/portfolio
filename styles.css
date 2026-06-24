@@ -541,19 +541,19 @@ h2 {
     --tile-w: 160px;
     --tile-h: 90px;
     --tile-gap: 8px;
-    --tile-wall-h: var(--tile-h);
+    --tile-wall-h: calc((var(--tile-h) * 2) + var(--tile-gap));
     --tile-edge-crop: 0px;
     --tile-edge-fade: 22px;
     --tile-edge-fade-near: 5px;
     --tile-edge-fade-mid: 13px;
     min-height: auto;
     padding-top: clamp(3rem, 8vh, 4rem);
-    padding-bottom: calc(var(--tile-h) + 3rem);
+    padding-bottom: calc(var(--tile-wall-h) + 3rem);
   }
 
   .tile-wall {
     inset: auto -2rem 1.25rem;
-    height: var(--tile-h);
+    height: var(--tile-wall-h);
     display: block;
     opacity: 0.72;
     transform: none;
@@ -563,13 +563,17 @@ h2 {
     display: none;
   }
 
-  .tile-row:first-child {
+  .tile-row:nth-child(-n + 2) {
     display: block;
+  }
+
+  .tile-row + .tile-row {
+    margin-top: var(--tile-gap);
   }
 
   .intro-panel::after {
     inset: auto -2rem 0;
-    height: calc(var(--tile-h) + 2.5rem);
+    height: calc(var(--tile-wall-h) + 2.5rem);
     background: linear-gradient(
       90deg,
       var(--paper) 0%,
