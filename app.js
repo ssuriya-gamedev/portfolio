@@ -191,13 +191,26 @@ const addPlayButton = (video) => {
   button.type = "button";
   button.setAttribute("aria-label", "Play video");
 
+  const toggleVideo = () => {
+    if (video.dataset.playRequested === "true") {
+      return;
+    }
+
+    if (video.paused) {
+      pauseInactiveVideos(video);
+      playVideo(video);
+    } else {
+      pauseVideo(video);
+    }
+  };
+
   button.addEventListener("click", (event) => {
     event.stopPropagation();
-    pauseInactiveVideos(video);
-    playVideo(video);
+    toggleVideo();
   });
 
   clip.append(button);
+  clip.addEventListener("click", toggleVideo);
 };
 
 const hydrateVideo = (video) => {

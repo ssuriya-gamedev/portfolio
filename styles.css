@@ -302,6 +302,7 @@ h2 {
   overflow: hidden;
   border: 1px solid var(--line);
   overflow-anchor: none;
+  cursor: pointer;
 }
 
 .work-panel {
@@ -425,6 +426,7 @@ h2 {
   z-index: 1;
   background: transparent;
   object-fit: contain;
+  pointer-events: none;
 }
 
 @supports not (aspect-ratio: 16 / 9) {
