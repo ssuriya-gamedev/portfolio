@@ -1,5 +1,4 @@
 const videos = Array.from(document.querySelectorAll("video"));
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const tileWall = document.querySelector("[data-tile-wall]");
 const visibleVideos = new Map();
 let scrollIdleTimer = 0;
@@ -214,7 +213,7 @@ const addPlayButton = (video) => {
 };
 
 const hydrateVideo = (video) => {
-  if (reduceMotion.matches || video.dataset.hydrated === "true") {
+  if (video.dataset.hydrated === "true") {
     return;
   }
 
@@ -238,7 +237,7 @@ const scheduleVideoHydration = (video) => {
     return true;
   }
 
-  if (reduceMotion.matches || video.dataset.loadScheduled === "true") {
+  if (video.dataset.loadScheduled === "true") {
     return false;
   }
 
@@ -253,7 +252,7 @@ const scheduleVideoHydration = (video) => {
 };
 
 const playVideo = (video) => {
-  if (reduceMotion.matches || !video.paused) {
+  if (!video.paused) {
     return;
   }
 
@@ -324,7 +323,7 @@ const getBestVisibleVideo = () => {
 };
 
 const playSettledVideo = () => {
-  if (reduceMotion.matches || document.hidden) {
+  if (document.hidden) {
     pauseInactiveVideos(null);
     return;
   }
@@ -451,21 +450,3 @@ document.addEventListener("visibilitychange", () => {
     scheduleSettledPlayback();
   }
 });
-
-const handleReducedMotionChange = () => {
-  videos.forEach((video) => {
-    if (reduceMotion.matches) {
-      pauseVideo(video);
-    }
-  });
-
-  if (!reduceMotion.matches) {
-    scheduleSettledPlayback();
-  }
-};
-
-if (typeof reduceMotion.addEventListener === "function") {
-  reduceMotion.addEventListener("change", handleReducedMotionChange);
-} else if (typeof reduceMotion.addListener === "function") {
-  reduceMotion.addListener(handleReducedMotionChange);
-}
